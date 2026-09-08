@@ -102,6 +102,31 @@
 <div class="fullscreen-brand">By RyzenMZKSHI</div>
 <div class="fullscreen-session-title" id="fullscreenSessionTitle">Fokus Belajar</div>
 <div class="timer" id="timer">25:00</div>
+<div class="fullscreen-controls" aria-label="Kontrol sesi fullscreen">
+  <button id="fullscreenPause" type="button" disabled>Pause</button>
+  <button id="fullscreenStop" class="stop-session" type="button">Berhenti</button>
+</div>
+<button class="spotify-toggle" id="spotifyToggle" type="button" aria-expanded="false">♫ Musik</button>
+<aside class="spotify-panel" id="spotifyPanel" hidden aria-label="Pemutar musik mini">
+  <div class="spotify-panel-head">
+    <strong>Music Mini Player</strong>
+    <div class="player-window-actions">
+      <button id="spotifyMinimize" type="button" aria-label="Minimize pemutar musik" aria-pressed="false">−</button>
+      <button id="spotifyClose" type="button" aria-label="Tutup pemutar musik">×</button>
+    </div>
+  </div>
+  <p>Pilih layanan, lalu cari judul lagu/nama artis atau tempel tautannya.</p>
+  <form id="spotifyForm">
+    <select id="musicProvider" aria-label="Pilih layanan musik">
+      <option value="spotify">Spotify</option>
+      <option value="youtube">YouTube Music</option>
+    </select>
+    <input id="spotifyUrl" type="text" autocomplete="off" placeholder="Contoh: ONE OK ROCK Wherever you are" aria-label="Cari lagu, artis, band, atau masukkan tautan musik"/>
+    <button type="submit">Cari / Putar</button>
+  </form>
+  <div class="spotify-message" id="spotifyMessage">Pemutar membutuhkan koneksi internet.</div>
+  <iframe id="spotifyFrame" title="Pemutar musik" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" hidden></iframe>
+</aside>
 <div class="resume-fullscreen" id="resumeFullscreen">
   <div class="resume-card">
     <div class="resume-title">Sesi Dijeda</div>

@@ -211,6 +211,13 @@ function paint(){
   roundLabel.textContent = `${round} / ${totalRounds}`;
   fullscreenSessionTitle.textContent = `${fullscreenSessionName()} • Ronde ${round}/${totalRounds}`;
   document.title = `${fmt(left)} • ${phase === "focus" ? "Belajar" : "Istirahat"} • By RyzenMZKSHI`;
+  const fullscreenActive = document.fullscreenElement === focusScreen || document.webkitFullscreenElement === focusScreen || document.body.classList.contains("focus-fallback");
+  focusScreen.classList.toggle("timer-ending", running && left > 0 && left <= 10 && fullscreenActive);
+  const pauseLabel = focusLockActive && !running ? "Lanjutkan" : "Pause";
+  pause.textContent = pauseLabel;
+  fullscreenPause.textContent = pauseLabel;
+  pause.disabled = !focusLockActive;
+  fullscreenPause.disabled = !focusLockActive;
 }
 
 function readMode(){
@@ -284,6 +291,7 @@ function nextPhase(autoStart = true){
 
 function startTicking(){
   if(timerInt) clearInterval(timerInt);
+  paint();
   timerInt = setInterval(()=>{
     left--;
     if(left === 10 && !warned){
@@ -367,7 +375,7 @@ function warningBeep(){
   try{
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
     const g = ctx.createGain();
-    g.gain.value = .18;
+    g.gain.value = .38;
     g.connect(ctx.destination);
 
     [0, .22, .44].forEach((delay,i)=>{
@@ -399,11 +407,46 @@ start.addEventListener("click",async ()=>{
   startTicking();
 });
 
-pause.addEventListener("click",()=>{
+function toggleTimerPause(){
+  if(!focusLockActive) return;
+  if(running){
+    if(timerInt) clearInterval(timerInt);
+    timerInt = null;
+    running = false;
+    paint();
+  }else{
+    running = true;
+    startTicking();
+  }
+}
+
+pause.addEventListener("click",toggleTimerPause);
+fullscreenPause.addEventListener("click",toggleTimerPause);
+
+async function stopToDashboard(){
   if(timerInt) clearInterval(timerInt);
   timerInt = null;
   running = false;
-});
+  forcedFullscreenPause = false;
+  focusLockActive = false;
+  resumeFullscreen.classList.remove("show");
+  await leaveFocusFullscreen();
+  setSpotifyPanel(false);
+  spotifyFrame.removeAttribute("src");
+  spotifyFrame.hidden = true;
+  spotifyPanel.classList.remove("minimized");
+  spotifyMinimize.textContent = "−";
+  spotifyMinimize.setAttribute("aria-pressed","false");
+  readMode();
+  phase = "focus";
+  round = 1;
+  left = focusMin * 60;
+  warned = false;
+  paint();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+fullscreenStop.addEventListener("click",stopToDashboard);
 
 skip.addEventListener("click",()=>{
   if(timerInt) clearInterval(timerInt);
@@ -418,12 +461,12 @@ function beep(){
   try{
     const ctx=new (window.AudioContext||window.webkitAudioContext)();
     const g=ctx.createGain();
-    g.gain.value=.24;
+    g.gain.value=.58;
     g.connect(ctx.destination);
 
     [0,.28,.56].forEach((delay,i)=>{
       const o=ctx.createOscillator();
-      o.type="sine";
+      o.type=i === 1 ? "square" : "sine";
       o.frequency.value = phase === "focus" ? (880 + i*90) : (650 + i*70);
       o.connect(g);
       o.start(ctx.currentTime+delay);
@@ -470,6 +513,82 @@ resumeFullscreenBtn.addEventListener("click", async ()=>{
     startTicking();
   }
 });
+
+function spotifyEmbedUrl(value){
+  const raw = value.trim();
+  const uriMatch = raw.match(/^spotify:(track|album|playlist|artist|show|episode):([A-Za-z0-9]+)$/i);
+  if(uriMatch) return `https://open.spotify.com/embed/${uriMatch[1].toLowerCase()}/${uriMatch[2]}?utm_source=generator&theme=0`;
+
+  try{
+    const url = new URL(raw);
+    if(url.hostname !== "open.spotify.com") return "";
+    const parts = url.pathname.split("/").filter(Boolean);
+    if(parts[0] && parts[0].startsWith("intl-")) parts.shift();
+    const allowed = ["track","album","playlist","artist","show","episode"];
+    if(!allowed.includes(parts[0]) || !/^[A-Za-z0-9]+$/.test(parts[1] || "")) return "";
+    return `https://open.spotify.com/embed/${parts[0]}/${parts[1]}?utm_source=generator&theme=0`;
+  }catch(e){ return ""; }
+}
+
+function youtubeEmbedUrl(value){
+  try{
+    const url = new URL(value.trim());
+    let videoId = "";
+    if(url.hostname === "youtu.be") videoId = url.pathname.slice(1);
+    if(["youtube.com","www.youtube.com","music.youtube.com"].includes(url.hostname)) videoId = url.searchParams.get("v") || "";
+    if(!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return "";
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  }catch(e){ return ""; }
+}
+
+function setSpotifyPanel(open){
+  spotifyPanel.hidden = !open;
+  spotifyToggle.setAttribute("aria-expanded", String(open));
+}
+
+spotifyToggle.addEventListener("click",()=>setSpotifyPanel(spotifyPanel.hidden));
+spotifyClose.addEventListener("click",()=>setSpotifyPanel(false));
+spotifyMinimize.addEventListener("click",()=>{
+  const minimized = spotifyPanel.classList.toggle("minimized");
+  spotifyMinimize.textContent = minimized ? "+" : "−";
+  spotifyMinimize.setAttribute("aria-label", minimized ? "Perbesar pemutar musik" : "Minimize pemutar musik");
+  spotifyMinimize.setAttribute("aria-pressed", String(minimized));
+});
+spotifyForm.addEventListener("submit",event=>{
+  event.preventDefault();
+  const query = spotifyUrl.value.trim();
+  if(!query){
+    spotifyMessage.textContent = "Masukkan judul lagu, nama artis/band, atau tautan musik.";
+    spotifyMessage.classList.add("error");
+    return;
+  }
+
+  const provider = musicProvider.value;
+  const embedUrl = provider === "youtube" ? youtubeEmbedUrl(query) : spotifyEmbedUrl(query);
+  if(!embedUrl){
+    const searchUrl = provider === "youtube"
+      ? `https://music.youtube.com/search?q=${encodeURIComponent(query)}`
+      : `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+    const popup = window.open(searchUrl,"musicMiniSearch","popup=yes,width=480,height=720,resizable=yes,scrollbars=yes");
+    spotifyMessage.textContent = popup
+      ? `Hasil pencarian dibuka di jendela ${provider === "youtube" ? "YouTube Music" : "Spotify"} kecil. Timer tetap berjalan.`
+      : "Popup diblokir browser. Izinkan popup untuk memakai pencarian musik.";
+    spotifyMessage.classList.toggle("error",!popup);
+    return;
+  }
+  localStorage.setItem("studySpotifyUrl", query);
+  localStorage.setItem("studyMusicProvider", provider);
+  spotifyMessage.textContent = `${provider === "youtube" ? "YouTube Music" : "Spotify"} berjalan di panel kecil tanpa meninggalkan timer.`;
+  spotifyMessage.classList.remove("error");
+  spotifyPanel.dataset.provider = provider;
+  spotifyFrame.src = embedUrl;
+  spotifyFrame.hidden = false;
+});
+
+const savedSpotifyUrl = localStorage.getItem("studySpotifyUrl");
+if(savedSpotifyUrl) spotifyUrl.value = savedSpotifyUrl;
+const savedMusicProvider = localStorage.getItem("studyMusicProvider");
+if(savedMusicProvider === "youtube") musicProvider.value = "youtube";
 
 darkBtn.addEventListener("click",()=>applyTheme("dark"));
 lightBtn.addEventListener("click",()=>applyTheme("light"));
