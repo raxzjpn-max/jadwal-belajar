@@ -136,10 +136,21 @@ function fmt(s){
   return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
 }
 
+function fullscreenSessionName(){
+  if(phase === "break") return "Sesi Istirahat";
+
+  const plan = shinkanzenPlan(new Date());
+  if(plan.chapter === "Latihan Soal") return "Sesi Latihan Soal";
+  if(plan.chapter === "Review Ringan" || plan.chapter === "Review Shinkanzen") return "Sesi Review";
+  if(plan.chapter === "JLPT N3") return "Sesi Ujian";
+  return "Sesi Materi";
+}
+
 function paint(){
   timer.textContent = fmt(left);
   phaseLabel.textContent = phase === "focus" ? "Fokus Belajar" : "Istirahat";
   roundLabel.textContent = `${round} / ${totalRounds}`;
+  fullscreenSessionTitle.textContent = `${fullscreenSessionName()} • Ronde ${round}/${totalRounds}`;
   document.title = `${fmt(left)} • ${phase === "focus" ? "Belajar" : "Istirahat"}`;
 }
 
@@ -190,9 +201,7 @@ function nextPhase(autoStart = true){
     }
     forcedFullscreenPause = false;
     resumeFullscreen.classList.remove("show");
-    focusLockActive = false;
     phase = "break";
-    leaveFocusFullscreen();
     left = breakMin * 60;
   }else{
     phase = "focus";
