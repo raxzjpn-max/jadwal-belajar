@@ -68,9 +68,7 @@ button.secondary{background:#202b42;border:1px solid var(--line)}
 
 body.focus-fallback{overflow:hidden}
 .focus-screen{position:relative}
-.exit-focus{
-  display:none;position:absolute;top:18px;right:18px;z-index:9999
-}
+
 .focus-screen:fullscreen,
 .focus-screen:-webkit-full-screen{
   width:100vw;height:100vh;background:var(--bg);
@@ -82,7 +80,7 @@ body.focus-fallback{overflow:hidden}
   margin:0;
 }
 .focus-screen:fullscreen .exit-focus,
-.focus-screen:-webkit-full-screen .exit-focus{display:block}
+.focus-screen:-webkit-full-screen 
 
 body.focus-fallback .focus-screen{
   position:fixed;inset:0;z-index:9998;background:var(--bg);
@@ -92,7 +90,7 @@ body.focus-fallback .focus-screen .timer{
   font-size:clamp(110px,28vw,260px);
   margin:0;
 }
-body.focus-fallback .focus-screen .exit-focus{display:block}
+body.focus-fallback .focus-screen 
 @media(max-width:600px){
   .app{padding:10px}.card{padding:13px;border-radius:16px}
   .countdown{gap:5px}.cd{padding:10px 3px}

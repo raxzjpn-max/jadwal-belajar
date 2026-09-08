@@ -123,6 +123,7 @@ function renderToday(){
 let timerInt = null;
 let running = false;
 let phase = "focus";
+let focusLockActive = false;
 let round = 1;
 let focusMin = 25;
 let breakMin = 5;
@@ -156,6 +157,8 @@ function readMode(){
 }
 
 function resetSession(){
+  focusLockActive = false;
+  leaveFocusFullscreen();
   if(timerInt) clearInterval(timerInt);
   running = false;
   readMode();
@@ -173,17 +176,23 @@ function nextPhase(autoStart = true){
     if(round >= totalRounds){
       if(timerInt) clearInterval(timerInt);
       running = false;
+      focusLockActive = false;
+      leaveFocusFullscreen();
       phaseLabel.textContent = "Selesai 🎉";
       timer.textContent = "00:00";
       document.title = "Sesi belajar selesai";
       return;
     }
+    focusLockActive = false;
     phase = "break";
+    leaveFocusFullscreen();
     left = breakMin * 60;
   }else{
     phase = "focus";
+    focusLockActive = true;
     round++;
     left = focusMin * 60;
+    restoreFocusFullscreenIfNeeded();
   }
 
   warned = false;
@@ -235,6 +244,36 @@ async function enterFullscreen(){
   }
 }
 
+
+async function leaveFocusFullscreen(){
+  try{
+    if(document.fullscreenElement && document.exitFullscreen){
+      await document.exitFullscreen();
+    }else if(document.webkitFullscreenElement && document.webkitExitFullscreen){
+      document.webkitExitFullscreen();
+    }
+  }catch(e){}
+  document.body.classList.remove("focus-fallback");
+}
+
+function shouldLockFullscreen(){
+  return focusLockActive && phase === "focus";
+}
+
+async function restoreFocusFullscreenIfNeeded(){
+  if(!shouldLockFullscreen()) return;
+  try{
+    const el = document.getElementById("focusScreen");
+    const request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if(!document.fullscreenElement && !document.webkitFullscreenElement && request){
+      const result = request.call(el);
+      if(result && typeof result.then === "function") await result;
+      if(document.fullscreenElement || document.webkitFullscreenElement) return;
+    }
+  }catch(e){}
+  document.body.classList.add("focus-fallback");
+}
+
 function warningBeep(){
   try{
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
@@ -263,6 +302,7 @@ customBreak.addEventListener("change",resetSession);
 
 start.addEventListener("click",async ()=>{
   if(running) return;
+  focusLockActive = true;
   await enterFullscreen();
   running = true;
   warned = false;
@@ -313,25 +353,20 @@ function applyTheme(theme){
 }
 
 
-exitFocus.addEventListener("click", async ()=>{
-  try{
-    if(document.fullscreenElement && document.exitFullscreen){
-      await document.exitFullscreen();
-    }else if(document.webkitFullscreenElement && document.webkitExitFullscreen){
-      document.webkitExitFullscreen();
-    }
-  }catch(e){}
-  document.body.classList.remove("focus-fallback");
-});
-
 document.addEventListener("fullscreenchange",()=>{
   if(!document.fullscreenElement){
     document.body.classList.remove("focus-fallback");
+    if(shouldLockFullscreen()){
+      setTimeout(restoreFocusFullscreenIfNeeded, 120);
+    }
   }
 });
 document.addEventListener("webkitfullscreenchange",()=>{
   if(!document.webkitFullscreenElement){
     document.body.classList.remove("focus-fallback");
+    if(shouldLockFullscreen()){
+      setTimeout(restoreFocusFullscreenIfNeeded, 120);
+    }
   }
 });
 
