@@ -97,3 +97,16 @@ body.focus-fallback .focus-screen
   .calendar,.weekdays{gap:4px}.day{min-height:66px;padding:6px}
   .day .mini{font-size:8px}.study-grid{grid-template-columns:1fr}
 }
+
+
+.resume-fullscreen{
+  display:none;position:fixed;inset:0;z-index:10000;background:var(--bg);
+  align-items:center;justify-content:center;padding:24px;text-align:center
+}
+.resume-fullscreen.show{display:flex}
+.resume-card{
+  width:min(420px,92vw);background:var(--card);border:1px solid var(--line);
+  border-radius:22px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.25)
+}
+.resume-title{font-size:28px;font-weight:900;margin-bottom:10px}
+.resume-text{color:var(--muted);margin-bottom:22px;line-height:1.6}

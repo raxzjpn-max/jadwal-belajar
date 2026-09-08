@@ -124,6 +124,7 @@ let timerInt = null;
 let running = false;
 let phase = "focus";
 let focusLockActive = false;
+let forcedFullscreenPause = false;
 let round = 1;
 let focusMin = 25;
 let breakMin = 5;
@@ -157,6 +158,8 @@ function readMode(){
 }
 
 function resetSession(){
+  forcedFullscreenPause = false;
+  resumeFullscreen.classList.remove("show");
   focusLockActive = false;
   leaveFocusFullscreen();
   if(timerInt) clearInterval(timerInt);
@@ -176,6 +179,8 @@ function nextPhase(autoStart = true){
     if(round >= totalRounds){
       if(timerInt) clearInterval(timerInt);
       running = false;
+      forcedFullscreenPause = false;
+      resumeFullscreen.classList.remove("show");
       focusLockActive = false;
       leaveFocusFullscreen();
       phaseLabel.textContent = "Selesai 🎉";
@@ -183,6 +188,8 @@ function nextPhase(autoStart = true){
       document.title = "Sesi belajar selesai";
       return;
     }
+    forcedFullscreenPause = false;
+    resumeFullscreen.classList.remove("show");
     focusLockActive = false;
     phase = "break";
     leaveFocusFullscreen();
@@ -244,6 +251,17 @@ async function enterFullscreen(){
   }
 }
 
+
+
+function pauseBecauseFullscreenExited(){
+  if(!focusLockActive || phase !== "focus") return;
+  forcedFullscreenPause = true;
+  if(timerInt) clearInterval(timerInt);
+  running = false;
+  const overlay = document.getElementById("resumeFullscreen");
+  if(overlay) overlay.classList.add("show");
+  document.title = "Sesi dijeda - kembali ke fullscreen";
+}
 
 async function leaveFocusFullscreen(){
   try{
@@ -354,19 +372,30 @@ function applyTheme(theme){
 
 
 document.addEventListener("fullscreenchange",()=>{
-  if(!document.fullscreenElement){
-    document.body.classList.remove("focus-fallback");
-    if(shouldLockFullscreen()){
-      setTimeout(restoreFocusFullscreenIfNeeded, 120);
-    }
+  if(!document.fullscreenElement && focusLockActive && phase === "focus"){
+    pauseBecauseFullscreenExited();
   }
 });
 document.addEventListener("webkitfullscreenchange",()=>{
-  if(!document.webkitFullscreenElement){
-    document.body.classList.remove("focus-fallback");
-    if(shouldLockFullscreen()){
-      setTimeout(restoreFocusFullscreenIfNeeded, 120);
-    }
+  if(!document.webkitFullscreenElement && focusLockActive && phase === "focus"){
+    pauseBecauseFullscreenExited();
+  }
+});
+
+
+resumeFullscreenBtn.addEventListener("click", async ()=>{
+  if(!forcedFullscreenPause) return;
+
+  await enterFullscreen();
+
+  const isNativeFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const isFallbackFullscreen = document.body.classList.contains("focus-fallback");
+
+  if(isNativeFullscreen || isFallbackFullscreen){
+    forcedFullscreenPause = false;
+    running = true;
+    resumeFullscreen.classList.remove("show");
+    startTicking();
   }
 });
 
