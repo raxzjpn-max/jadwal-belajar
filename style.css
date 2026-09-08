@@ -110,3 +110,22 @@ body.focus-fallback .focus-screen
 }
 .resume-title{font-size:28px;font-weight:900;margin-bottom:10px}
 .resume-text{color:var(--muted);margin-bottom:22px;line-height:1.6}
+
+
+.fullscreen-session-title{
+  display:none;
+  font-size:clamp(24px,5vw,46px);
+  font-weight:900;
+  text-align:center;
+  margin-bottom:18px;
+}
+.focus-screen:fullscreen,
+.focus-screen:-webkit-full-screen,
+body.focus-fallback .focus-screen{
+  flex-direction:column;
+}
+.focus-screen:fullscreen .fullscreen-session-title,
+.focus-screen:-webkit-full-screen .fullscreen-session-title,
+body.focus-fallback .fullscreen-session-title{
+  display:block;
+}
