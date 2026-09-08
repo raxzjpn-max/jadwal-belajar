@@ -1,0 +1,109 @@
+<!doctype html>
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>JLPT N3 Study Calendar</title>
+
+<link href="manifest.webmanifest" rel="manifest"/>
+<meta content="#0b1120" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Study Focus" name="apple-mobile-web-app-title"/>
+<link href="style.css" rel="stylesheet"/></head>
+<body><button class="action secondary exit-focus" id="exitFocus" type="button">Keluar Fullscreen</button>
+<div class="app">
+<section class="card top">
+<div class="muted">COUNTDOWN JLPT N3</div>
+<h1>6 Desember 2026</h1>
+<div class="exam">Hari terakhir persiapan</div>
+<div class="countdown">
+<div class="cd"><strong id="daysLeft">0</strong><span>HARI</span></div>
+<div class="cd"><strong id="hoursLeft">0</strong><span>JAM</span></div>
+<div class="cd"><strong id="minutesLeft">0</strong><span>MENIT</span></div>
+<div class="cd"><strong id="secondsLeft">0</strong><span>DETIK</span></div>
+</div>
+<div class="theme-toggle">
+<button class="theme-btn" id="darkBtn" type="button">🌙 Dark</button>
+<button class="theme-btn" id="lightBtn" type="button">☀️ White</button>
+</div>
+</section>
+<section class="card">
+<div class="month-head">
+<div>
+<div class="muted" style="font-size:12px">Kalender bulan berjalan</div>
+<div class="month-title" id="monthTitle"></div>
+</div>
+<div class="legend">Tanggal lewat = dicoret<br/>Tap tanggal = selesai</div>
+</div>
+<div class="weekdays">
+<div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+</div>
+<div class="calendar" id="calendar"></div>
+</section>
+<section class="card">
+<h2>🎯 Target Hari Ini</h2>
+<div class="target-box">
+<div class="target-line">
+<div><span>Kosakata</span><br/><b>20 kata</b></div>
+<div style="text-align:right"><span>Target tetap</span><br/><b>setiap hari</b></div>
+</div>
+<div class="target-line">
+<div><span>Bunpou</span><br/><b id="grammarChapter">Shinkanzen Bab 1</b></div>
+<div style="text-align:right"><span>Urutan</span><br/><b id="grammarPart">Bagian 1</b></div>
+</div>
+</div>
+</section>
+<section class="card">
+<h2>⏱️ Study Time</h2>
+<div class="study-grid">
+<div>
+<label>Mode belajar</label>
+<select id="studyMode">
+<option value="25,5,4">Pomodoro — 25/5 × 4</option>
+<option value="50,10,3">Deep Focus — 50/10 × 3</option>
+<option value="90,20,2">Long Focus — 90/20 × 2</option>
+<option value="custom">Custom</option>
+</select>
+</div>
+<button class="action" id="start">Start</button>
+</div>
+<div id="customBox" style="display:none;margin-top:12px">
+<div class="study-grid">
+<div>
+<label>Belajar (menit)</label>
+<select id="customStudy">
+<option>20</option><option selected="">30</option><option>40</option><option>45</option><option>60</option><option>90</option>
+</select>
+</div>
+<div>
+<label>Istirahat (menit)</label>
+<select id="customBreak">
+<option>5</option><option selected="">10</option><option>15</option><option>20</option>
+</select>
+</div>
+</div>
+</div>
+<div class="target-box" style="margin-top:14px">
+<div class="target-line">
+<div><span>Status</span><br/><b id="phaseLabel">Fokus Belajar</b></div>
+<div style="text-align:right"><span>Ronde</span><br/><b id="roundLabel">1 / 4</b></div>
+</div>
+</div>
+<div class="timer" id="timer">25:00</div>
+<div class="timer-actions">
+<button class="action secondary" id="pause">Pause</button>
+<button class="action secondary" id="skip">Lewati Sesi</button>
+<button class="action secondary" id="reset">Reset</button>
+</div>
+<p class="muted" style="text-align:center;margin-top:12px;font-size:12px">
+      Start → masuk fullscreen. Peringatan suara berbunyi saat tersisa 10 detik, lalu bunyi lagi saat sesi berakhir.
+    </p>
+</section>
+</div>
+
+
+<script defer="True" src="app.js"></script></body>
+</html>

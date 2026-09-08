@@ -1,0 +1,90 @@
+:root{
+  --bg:#0b1120; --card:#141c2d; --card2:#0f1726; --line:#26344e;
+  --text:#f6f8fc; --muted:#9eabc0; --accent:#7d8cff; --ok:#55d6a5;
+  --gold:#f2c96b;
+}
+body.light{
+  --bg:#f4f6fb; --card:#ffffff; --card2:#f8f9fd; --line:#dfe4ee;
+  --text:#172033; --muted:#788399; --accent:#5267e8; --ok:#25a879;
+  --gold:#c59022;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);
+  color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+.app{width:min(900px,100%);margin:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
+.top{text-align:center}
+h1{font-size:clamp(24px,6vw,40px);margin:0 0 5px}
+h2{font-size:19px;margin:0 0 14px}
+p{margin:0}.muted{color:var(--muted)}
+.exam{font-size:13px;color:var(--gold);font-weight:800;margin-top:5px}
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.cd{background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:12px 5px}
+.cd strong{display:block;font-size:clamp(23px,7vw,37px)}
+.cd span{font-size:11px;color:var(--muted)}
+.month-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.month-title{font-size:20px;font-weight:900}
+.legend{font-size:11px;color:var(--muted)}
+.weekdays,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.weekdays div{text-align:center;font-size:11px;color:var(--muted);padding:4px}
+.day{
+  min-height:78px;background:var(--card2);border:1px solid var(--line);border-radius:12px;
+  padding:8px;position:relative;cursor:pointer;color:var(--text);text-align:left
+}
+.day.empty{visibility:hidden}
+.day.past{opacity:.36}
+.day.past .num{text-decoration:line-through;text-decoration-thickness:2px}
+.day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day.done{border-color:var(--ok)}
+.day .num{font-size:15px;font-weight:900}
+.day .mini{font-size:9px;color:var(--muted);line-height:1.35;margin-top:5px}
+.day.done::after{content:"✓";position:absolute;right:6px;top:5px;color:var(--ok);font-weight:900}
+.day.examday{border-color:var(--gold)}
+.target-box{
+  background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px
+}
+.target-line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.target-line:last-child{border-bottom:0}
+.target-line b{font-size:17px}
+.target-line span{color:var(--muted);font-size:13px}
+.study-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+select{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px}
+button.action{border:0;border-radius:13px;padding:12px 16px;font-weight:900;cursor:pointer;background:var(--accent);color:white}
+button.secondary{background:#202b42;border:1px solid var(--line)}
+.timer{text-align:center;font-size:clamp(52px,14vw,88px);font-weight:900;letter-spacing:-3px;margin:14px 0}
+.timer-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+
+.theme-toggle{
+  display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap
+}
+.theme-btn{
+  border:1px solid var(--line);background:var(--card2);color:var(--text);
+  border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer
+}
+.theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+body.focus-fallback{overflow:hidden}
+body.focus-fallback .app > section:not(:last-of-type){display:none}
+body.focus-fallback .app{
+  width:100%;max-width:none;min-height:100vh;margin:0;padding:0;
+  display:flex;align-items:center;justify-content:center
+}
+body.focus-fallback .app > section:last-of-type{
+  width:100%;min-height:100vh;margin:0;border-radius:0;border:0;
+  display:flex;flex-direction:column;justify-content:center;padding:24px
+}
+body.focus-fallback .timer{font-size:clamp(88px,22vw,190px)}
+.exit-focus{
+  display:none;position:fixed;top:14px;right:14px;z-index:9999
+}
+body.focus-fallback .exit-focus,
+:fullscreen .exit-focus{display:block}
+@media(max-width:600px){
+  .app{padding:10px}.card{padding:13px;border-radius:16px}
+  .countdown{gap:5px}.cd{padding:10px 3px}
+  .calendar,.weekdays{gap:4px}.day{min-height:66px;padding:6px}
+  .day .mini{font-size:8px}.study-grid{grid-template-columns:1fr}
+}

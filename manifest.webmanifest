@@ -1,0 +1,10 @@
+{
+  "name": "JLPT N3 Study Focus Scheduler",
+  "short_name": "Study Focus",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "description": "Offline JLPT N3 study scheduler, countdown, calendar, and focus timer."
+}
