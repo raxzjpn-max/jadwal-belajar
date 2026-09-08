@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>JLPT N3 Study Calendar</title>
+<title>JLPT N3 Study Calendar • By RyzenMZKSHI</title>
 
 <link href="manifest.webmanifest" rel="manifest"/>
 <meta content="#0b1120" name="theme-color"/>
@@ -17,7 +17,8 @@
 <section class="card top">
 <div class="muted">COUNTDOWN JLPT N3</div>
 <h1>6 Desember 2026</h1>
-<div class="exam">Hari terakhir persiapan</div>
+<div class="creator-title">By RyzenMZKSHI</div>
+<div class="exam">Hari Ujian</div>
 <div class="countdown">
 <div class="cd"><strong id="daysLeft">0</strong><span>HARI</span></div>
 <div class="cd"><strong id="hoursLeft">0</strong><span>JAM</span></div>
@@ -35,16 +36,22 @@
 <div class="muted" style="font-size:12px">Kalender bulan berjalan</div>
 <div class="month-title" id="monthTitle"></div>
 </div>
-<div class="legend">Tanggal lewat = dicoret<br/>Tap tanggal = selesai</div>
+<div class="calendar-nav" aria-label="Navigasi kalender">
+<button class="calendar-nav-btn" id="prevMonth" type="button" aria-label="Lihat bulan sebelumnya">← Sebelumnya</button>
+<button class="calendar-nav-btn today-btn" id="currentMonth" type="button">Bulan ini</button>
+<button class="calendar-nav-btn" id="nextMonth" type="button" aria-label="Lihat bulan selanjutnya">Selanjutnya →</button>
+</div>
+<div class="legend">Merah = Minggu/libur Jepang<br/>Tap tanggal = selesai</div>
 </div>
 <div class="weekdays">
 <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
 </div>
 <div class="calendar" id="calendar"></div>
+<div class="calendar-note" id="calendarNote"></div>
 </section>
 <section class="card">
 <h2>🎯 Target Hari Ini</h2>
-<div class="target-box">
+<div class="target-box" id="todayTargets">
 <div class="target-line">
 <div><span>Kosakata</span><br/><b>20 kata</b></div>
 <div style="text-align:right"><span>Target tetap</span><br/><b>setiap hari</b></div>
@@ -70,18 +77,18 @@
 <button class="action" id="start">Start</button>
 </div>
 <div id="customBox" style="display:none;margin-top:12px">
-<div class="study-grid">
+<div class="study-grid custom-grid">
 <div>
 <label>Belajar (menit)</label>
-<select id="customStudy">
-<option>20</option><option selected="">30</option><option>40</option><option>45</option><option>60</option><option>90</option>
-</select>
+<input id="customStudy" type="number" min="1" max="1440" step="1" value="30" inputmode="numeric"/>
 </div>
 <div>
 <label>Istirahat (menit)</label>
-<select id="customBreak">
-<option>5</option><option selected="">10</option><option>15</option><option>20</option>
-</select>
+<input id="customBreak" type="number" min="1" max="480" step="1" value="10" inputmode="numeric"/>
+</div>
+<div>
+<label>Jumlah ronde</label>
+<input id="customRounds" type="number" min="1" max="20" step="1" value="4" inputmode="numeric"/>
 </div>
 </div>
 </div>
@@ -92,6 +99,7 @@
 </div>
 </div>
 <div class="focus-screen" id="focusScreen">
+<div class="fullscreen-brand">By RyzenMZKSHI</div>
 <div class="fullscreen-session-title" id="fullscreenSessionTitle">Fokus Belajar</div>
 <div class="timer" id="timer">25:00</div>
 <div class="resume-fullscreen" id="resumeFullscreen">

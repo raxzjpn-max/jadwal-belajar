@@ -17,6 +17,7 @@ body{
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
 .top{text-align:center}
 h1{font-size:clamp(24px,6vw,40px);margin:0 0 5px}
+.creator-title{color:var(--muted);font-size:13px;font-weight:800;letter-spacing:.08em;margin:3px 0 6px}
 h2{font-size:19px;margin:0 0 14px}
 p{margin:0}.muted{color:var(--muted)}
 .exam{font-size:13px;color:var(--gold);font-weight:800;margin-top:5px}
@@ -27,6 +28,10 @@ p{margin:0}.muted{color:var(--muted)}
 .month-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
 .month-title{font-size:20px;font-weight:900}
 .legend{font-size:11px;color:var(--muted)}
+.calendar-nav{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.calendar-nav-btn{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer}
+.calendar-nav-btn:hover,.calendar-nav-btn:focus-visible{border-color:var(--accent);outline:none}
+.calendar-nav-btn.today-btn{color:var(--accent)}
 .weekdays,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .weekdays div{text-align:center;font-size:11px;color:var(--muted);padding:4px}
 .day{
@@ -42,6 +47,14 @@ p{margin:0}.muted{color:var(--muted)}
 .day .mini{font-size:9px;color:var(--muted);line-height:1.35;margin-top:5px}
 .day.done::after{content:"✓";position:absolute;right:6px;top:5px;color:var(--ok);font-weight:900}
 .day.examday{border-color:var(--gold)}
+.day.holiday{border-color:#ef5350;background:color-mix(in srgb,#ef5350 12%,var(--card2))}
+.day.holiday .num,.holiday-name{color:#ff625f}
+.holiday-name{font-size:9px;font-weight:900;line-height:1.25;margin-top:4px}
+.calendar-note{
+  margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+  background:var(--card2);color:var(--muted);font-size:12px;line-height:1.6
+}
+.calendar-note b{color:var(--text)}
 .target-box{
   background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px
 }
@@ -51,7 +64,8 @@ p{margin:0}.muted{color:var(--muted)}
 .target-line span{color:var(--muted);font-size:13px}
 .study-grid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
 label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-select{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px}
+select,input[type="number"]{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px}
+.custom-grid{grid-template-columns:repeat(3,1fr)}
 button.action{border:0;border-radius:13px;padding:12px 16px;font-weight:900;cursor:pointer;background:var(--accent);color:white}
 button.secondary{background:#202b42;border:1px solid var(--line)}
 .timer{text-align:center;font-size:clamp(52px,14vw,88px);font-weight:900;letter-spacing:-3px;margin:14px 0}
@@ -89,9 +103,10 @@ body.focus-fallback .focus-screen .timer{
 }
 @media(max-width:600px){
   .app{padding:10px}.card{padding:13px;border-radius:16px}
+  .month-head{align-items:flex-start;flex-wrap:wrap}.calendar-nav{order:3;width:100%}.calendar-nav-btn{flex:1}
   .countdown{gap:5px}.cd{padding:10px 3px}
   .calendar,.weekdays{gap:4px}.day{min-height:66px;padding:6px}
-  .day .mini{font-size:8px}.study-grid{grid-template-columns:1fr}
+  .day .mini{font-size:8px}.study-grid,.custom-grid{grid-template-columns:1fr}
 }
 
 
@@ -115,6 +130,15 @@ body.focus-fallback .focus-screen .timer{
   text-align:center;
   margin-bottom:18px;
 }
+.fullscreen-brand{
+  display:none;
+  color:var(--muted);
+  font-size:clamp(12px,2vw,17px);
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
 .focus-screen:fullscreen,
 .focus-screen:-webkit-full-screen,
 body.focus-fallback .focus-screen{
@@ -123,5 +147,10 @@ body.focus-fallback .focus-screen{
 .focus-screen:fullscreen .fullscreen-session-title,
 .focus-screen:-webkit-full-screen .fullscreen-session-title,
 body.focus-fallback .fullscreen-session-title{
+  display:block;
+}
+.focus-screen:fullscreen .fullscreen-brand,
+.focus-screen:-webkit-full-screen .fullscreen-brand,
+body.focus-fallback .fullscreen-brand{
   display:block;
 }

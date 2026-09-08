@@ -1,6 +1,29 @@
 const examDate = new Date(2026,11,6,23,59,59);
 const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 let doneDays = JSON.parse(localStorage.getItem("jlptDoneDays") || "[]");
+let calendarView = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+// Hari libur nasional Jepang 2026–2027 berdasarkan daftar resmi Cabinet Office Jepang.
+const japanHolidays = {
+  "2026-01-01":"Tahun Baru", "2026-01-12":"Hari Kedewasaan",
+  "2026-02-11":"Hari Pembentukan Negara", "2026-02-23":"Ulang Tahun Kaisar",
+  "2026-03-20":"Hari Ekuinoks Musim Semi", "2026-04-29":"Hari Showa",
+  "2026-05-03":"Hari Konstitusi", "2026-05-04":"Hari Hijau",
+  "2026-05-05":"Hari Anak", "2026-05-06":"Hari Libur Pengganti",
+  "2026-07-20":"Hari Laut", "2026-08-11":"Hari Gunung",
+  "2026-09-21":"Hari Penghormatan Lansia", "2026-09-22":"Hari Libur Nasional",
+  "2026-09-23":"Hari Ekuinoks Musim Gugur", "2026-10-12":"Hari Olahraga",
+  "2026-11-03":"Hari Kebudayaan", "2026-11-23":"Hari Syukur Pekerja",
+  "2027-01-01":"Tahun Baru", "2027-01-11":"Hari Kedewasaan",
+  "2027-02-11":"Hari Pembentukan Negara", "2027-02-23":"Ulang Tahun Kaisar",
+  "2027-03-21":"Hari Ekuinoks Musim Semi", "2027-03-22":"Hari Libur Pengganti",
+  "2027-04-29":"Hari Showa", "2027-05-03":"Hari Konstitusi",
+  "2027-05-04":"Hari Hijau", "2027-05-05":"Hari Anak",
+  "2027-07-19":"Hari Laut", "2027-08-11":"Hari Gunung",
+  "2027-09-20":"Hari Penghormatan Lansia", "2027-09-23":"Hari Ekuinoks Musim Gugur",
+  "2027-10-11":"Hari Olahraga", "2027-11-03":"Hari Kebudayaan",
+  "2027-11-23":"Hari Syukur Pekerja"
+};
 
 function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
@@ -10,9 +33,18 @@ function shinkanzenPlan(date){
   const m = date.getMonth(); // 8=Sep, 9=Oct, 10=Nov, 11=Dec
   const d = date.getDate();
 
-  // September–October: tuntaskan materi.
-  // November: hanya latihan soal.
-  // 1–5 Desember: review ringan. 6 Desember: hari ujian/target akhir.
+  // September: kosakata + kanji. Oktober: bunpou, reading, choukai.
+  // November: latihan soal. 1–5 Desember: review akhir. 6 Desember: ujian.
+  if (m === 8) {
+    if ([7,14,21,28].includes(d)) return {chapter:"Review Materi", part:"Kosakata + Kanji"};
+    return {chapter:"Kosakata + Kanji", part:"20 kosakata • 5 kanji"};
+  }
+
+  if (m === 9) {
+    const octoberFocus = ["Bunpou", "Reading", "Choukai"];
+    return {chapter:"Materi Oktober", part:octoberFocus[(d-1)%3]};
+  }
+
   if (m === 10) {
     const weekly = [
       "Mojigoi + Goi",
@@ -28,24 +60,8 @@ function shinkanzenPlan(date){
 
   if (m === 11) {
     if (d === 6) return {chapter:"JLPT N3", part:"Hari H"};
-    if (d <= 5) return {chapter:"Review Ringan", part:"Kesalahan penting"};
+    if (d <= 5) return {chapter:"Review Akhir", part:"Kesalahan penting"};
     return {chapter:"Selesai", part:""};
-  }
-
-  if (m === 8 || m === 9) {
-    // Review mingguan agar materi tetap melekat
-    if ([7,14,21,28].includes(d)) return {chapter:"Review Shinkanzen", part:"Ulang materi minggu ini"};
-
-    // Bab berjalan terus dari September sampai Oktober
-    const start = new Date(2026,8,1);
-    const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    let studyDay = 0;
-    for (let x = new Date(start); x <= current; x.setDate(x.getDate()+1)) {
-      if (![7,14,21,28].includes(x.getDate())) studyDay++;
-    }
-    const chapter = Math.ceil(studyDay/2);
-    const part = studyDay % 2 === 1 ? "Bagian 1" : "Bagian 2";
-    return {chapter:`Shinkanzen Bab ${chapter}`, part};
   }
 
   return {chapter:"Persiapan", part:""};
@@ -62,9 +78,19 @@ function updateCountdown(){
 }
 
 function renderCalendar(){
-  const now=new Date(), year=now.getFullYear(), month=now.getMonth();
+  const now=new Date(), year=calendarView.getFullYear(), month=calendarView.getMonth();
   monthTitle.textContent=`${monthNames[month]} ${year}`;
   calendar.innerHTML="";
+  const monthNotes = {
+    8: "<b>Keterangan September:</b> fokus 20 kosakata dan 5 kanji setiap hari. Tanggal 7, 14, 21, dan 28 digunakan untuk review kosakata dan kanji.",
+    9: "<b>Keterangan Oktober:</b> fokus materi Bunpou, Reading, dan Choukai secara bergantian setiap hari.",
+    10: "<b>Keterangan November:</b> tidak ada materi baru. Fokus penuh pada latihan soal, analisis kesalahan, dan mini mock test.",
+    11: "<b>Keterangan Desember:</b> tanggal 1–5 untuk review akhir. Tanggal 6 Desember adalah Hari Ujian JLPT N3."
+  };
+  calendarNote.innerHTML = year === 2026
+    ? (monthNotes[month] || "<b>Keterangan:</b> persiapan menuju JLPT N3 tanggal 6 Desember 2026.")
+    : "<b>Keterangan:</b> tanggal berwarna merah merupakan hari libur nasional Jepang.";
+  calendarNote.innerHTML += "<br><b>Libur rutin:</b> setiap hari Minggu ditandai merah dan tidak memiliki target belajar.";
   const first=new Date(year,month,1), lastDay=new Date(year,month+1,0).getDate();
 
   for(let i=0;i<first.getDay();i++){
@@ -73,20 +99,31 @@ function renderCalendar(){
 
   for(let d=1;d<=lastDay;d++){
     const dt=new Date(year,month,d), key=dateKey(dt), plan=shinkanzenPlan(dt);
+    const nationalHoliday=japanHolidays[key], isSunday=dt.getDay()===0;
+    const holiday=nationalHoliday || (isSunday ? "Hari Minggu" : "");
     const cell=document.createElement("button");
     cell.type="button"; cell.className="day";
     if(startOfDay(dt)<startOfDay(now)) cell.classList.add("past");
     if(sameDay(dt,now)) cell.classList.add("today");
     if(doneDays.includes(key)) cell.classList.add("done");
     if(sameDay(dt,examDate)) cell.classList.add("examday");
+    if(holiday){ cell.classList.add("holiday"); cell.title=holiday; }
 
-    if (month === 10) {
+    if (isSunday) {
+      cell.innerHTML=`<div class="num">${d}</div><div class="mini">Libur<br>Hari Minggu</div>`;
+    } else if (year === 2026 && month === 8) {
+      const isReview = plan.chapter === "Review Materi";
+      cell.innerHTML=`<div class="num">${d}</div><div class="mini">${isReview ? "Review" : "20 kosakata"}<br>${isReview ? "Kosakata + Kanji" : "5 kanji"}</div>`;
+    } else if (year === 2026 && month === 9) {
+      cell.innerHTML=`<div class="num">${d}</div><div class="mini">${plan.part}<br>Fokus materi</div>`;
+    } else if (year === 2026 && month === 10) {
       cell.innerHTML=`<div class="num">${d}</div><div class="mini">${plan.part}<br>Latihan soal</div>`;
-    } else if (month === 11) {
+    } else if (year === 2026 && month === 11) {
       cell.innerHTML=`<div class="num">${d}</div><div class="mini">${plan.chapter}<br>${plan.part}</div>`;
     } else {
-      cell.innerHTML=`<div class="num">${d}</div><div class="mini">20 kotoba<br>${plan.chapter.replace("Shinkanzen ","")}</div>`;
+      cell.innerHTML=`<div class="num">${d}</div><div class="mini">${plan.chapter}<br>${plan.part}</div>`;
     }
+    if(nationalHoliday) cell.insertAdjacentHTML("beforeend",`<div class="holiday-name">${nationalHoliday}</div>`);
     cell.addEventListener("click",()=>{
       if(doneDays.includes(key)) doneDays=doneDays.filter(x=>x!==key);
       else doneDays.push(key);
@@ -97,27 +134,49 @@ function renderCalendar(){
   }
 }
 
+prevMonth.addEventListener("click",()=>{
+  calendarView = new Date(calendarView.getFullYear(), calendarView.getMonth()-1, 1);
+  renderCalendar();
+});
+nextMonth.addEventListener("click",()=>{
+  calendarView = new Date(calendarView.getFullYear(), calendarView.getMonth()+1, 1);
+  renderCalendar();
+});
+currentMonth.addEventListener("click",()=>{
+  const now = new Date();
+  calendarView = new Date(now.getFullYear(), now.getMonth(), 1);
+  renderCalendar();
+});
+
 function renderToday(){
   const now = new Date();
   const p = shinkanzenPlan(now);
+  const target = document.getElementById("todayTargets");
+
+  if (now.getMonth() === 8) {
+    const review = p.chapter === "Review Materi";
+    target.innerHTML = review
+      ? `<div class="target-line"><div><span>Fokus hari ini</span><br><b>Review Kosakata</b></div><div style="text-align:right"><span>Tambahan</span><br><b>Review Kanji</b></div></div>`
+      : `<div class="target-line"><div><span>Kosakata</span><br><b>20 kata</b></div><div style="text-align:right"><span>Kanji</span><br><b>5 kanji</b></div></div>`;
+    return;
+  }
+
+  if (now.getMonth() === 9) {
+    target.innerHTML = `<div class="target-line"><div><span>Fokus Oktober</span><br><b>${p.part}</b></div><div style="text-align:right"><span>Materi bulan ini</span><br><b>Bunpou • Reading • Choukai</b></div></div>`;
+    return;
+  }
 
   if (now.getMonth() === 10) {
-    grammarChapter.textContent = "100% Latihan Soal";
-    grammarPart.textContent = p.part;
-    const labels = document.querySelectorAll(".target-line");
-    labels[0].innerHTML = `<div><span>Target November</span><br><b>${p.part}</b></div><div style="text-align:right"><span>Fokus</span><br><b>Latihan soal</b></div>`;
-    labels[1].innerHTML = `<div><span>Materi baru</span><br><b>0 kosakata / 0 bunpou</b></div><div style="text-align:right"><span>Tujuan</span><br><b>Analisis kesalahan</b></div>`;
+    target.innerHTML = `<div class="target-line"><div><span>Target November</span><br><b>${p.part}</b></div><div style="text-align:right"><span>Fokus</span><br><b>Latihan soal</b></div></div><div class="target-line"><div><span>Materi baru</span><br><b>Tidak ada</b></div><div style="text-align:right"><span>Tujuan</span><br><b>Analisis kesalahan</b></div></div>`;
     return;
   }
 
   if (now.getMonth() === 11) {
-    grammarChapter.textContent = p.chapter;
-    grammarPart.textContent = p.part;
+    target.innerHTML = `<div class="target-line"><div><span>Target Desember</span><br><b>${p.chapter}</b></div><div style="text-align:right"><span>Status</span><br><b>${p.part}</b></div></div>`;
     return;
   }
 
-  grammarChapter.textContent = p.chapter;
-  grammarPart.textContent = p.part;
+  target.innerHTML = `<div class="target-line"><div><span>Program</span><br><b>${p.chapter}</b></div><div style="text-align:right"><span>Target</span><br><b>JLPT N3</b></div></div>`;
 }
 
 let timerInt = null;
@@ -141,7 +200,7 @@ function fullscreenSessionName(){
 
   const plan = shinkanzenPlan(new Date());
   if(plan.chapter === "Latihan Soal") return "Sesi Latihan Soal";
-  if(plan.chapter === "Review Ringan" || plan.chapter === "Review Shinkanzen") return "Sesi Review";
+  if(plan.chapter === "Review Akhir" || plan.chapter === "Review Materi") return "Sesi Review";
   if(plan.chapter === "JLPT N3") return "Sesi Ujian";
   return "Sesi Materi";
 }
@@ -151,15 +210,18 @@ function paint(){
   phaseLabel.textContent = phase === "focus" ? "Fokus Belajar" : "Istirahat";
   roundLabel.textContent = `${round} / ${totalRounds}`;
   fullscreenSessionTitle.textContent = `${fullscreenSessionName()} • Ronde ${round}/${totalRounds}`;
-  document.title = `${fmt(left)} • ${phase === "focus" ? "Belajar" : "Istirahat"}`;
+  document.title = `${fmt(left)} • ${phase === "focus" ? "Belajar" : "Istirahat"} • By RyzenMZKSHI`;
 }
 
 function readMode(){
   const value = studyMode.value;
   if(value === "custom"){
-    focusMin = Number(customStudy.value);
-    breakMin = Number(customBreak.value);
-    totalRounds = 4;
+    focusMin = Math.min(1440, Math.max(1, Number(customStudy.value) || 1));
+    breakMin = Math.min(480, Math.max(1, Number(customBreak.value) || 1));
+    totalRounds = Math.min(20, Math.max(1, Number(customRounds.value) || 1));
+    customStudy.value = focusMin;
+    customBreak.value = breakMin;
+    customRounds.value = totalRounds;
   }else{
     const [f,b,r] = value.split(",").map(Number);
     focusMin = f;
@@ -196,7 +258,7 @@ function nextPhase(autoStart = true){
       leaveFocusFullscreen();
       phaseLabel.textContent = "Selesai 🎉";
       timer.textContent = "00:00";
-      document.title = "Sesi belajar selesai";
+      document.title = "Sesi belajar selesai • By RyzenMZKSHI";
       return;
     }
     forcedFullscreenPause = false;
@@ -269,7 +331,7 @@ function pauseBecauseFullscreenExited(){
   running = false;
   const overlay = document.getElementById("resumeFullscreen");
   if(overlay) overlay.classList.add("show");
-  document.title = "Sesi dijeda - kembali ke fullscreen";
+  document.title = "Sesi dijeda • By RyzenMZKSHI";
 }
 
 async function leaveFocusFullscreen(){
@@ -326,6 +388,7 @@ studyMode.addEventListener("change",()=>{
 
 customStudy.addEventListener("change",resetSession);
 customBreak.addEventListener("change",resetSession);
+customRounds.addEventListener("change",resetSession);
 
 start.addEventListener("click",async ()=>{
   if(running) return;
