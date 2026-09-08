@@ -1,4 +1,4 @@
-const CACHE_NAME = "study-focus-v2";
+const CACHE_NAME = "study-focus-v3";
 const CORE_FILES = [
   "./",
   "./index.html",

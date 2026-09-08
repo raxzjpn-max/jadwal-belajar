@@ -220,16 +220,16 @@ function startTicking(){
 async function enterFullscreen(){
   let entered = false;
   try{
-    const el = document.documentElement;
+    const el = document.getElementById("focusScreen");
     const request = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    if(!document.fullscreenElement && request){
+    if(!document.fullscreenElement && !document.webkitFullscreenElement && request){
       const result = request.call(el);
       if(result && typeof result.then === "function") await result;
       entered = !!(document.fullscreenElement || document.webkitFullscreenElement);
     }
   }catch(e){}
 
-  // Fallback visual full-screen mode when the browser blocks the Fullscreen API.
+  // Fallback: hanya timer yang menutupi layar jika fullscreen asli diblokir.
   if(!entered){
     document.body.classList.add("focus-fallback");
   }

@@ -67,21 +67,32 @@ button.secondary{background:#202b42;border:1px solid var(--line)}
 .theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 body.focus-fallback{overflow:hidden}
-body.focus-fallback .app > section:not(:last-of-type){display:none}
-body.focus-fallback .app{
-  width:100%;max-width:none;min-height:100vh;margin:0;padding:0;
-  display:flex;align-items:center;justify-content:center
-}
-body.focus-fallback .app > section:last-of-type{
-  width:100%;min-height:100vh;margin:0;border-radius:0;border:0;
-  display:flex;flex-direction:column;justify-content:center;padding:24px
-}
-body.focus-fallback .timer{font-size:clamp(88px,22vw,190px)}
+.focus-screen{position:relative}
 .exit-focus{
-  display:none;position:fixed;top:14px;right:14px;z-index:9999
+  display:none;position:absolute;top:18px;right:18px;z-index:9999
 }
-body.focus-fallback .exit-focus,
-:fullscreen .exit-focus{display:block}
+.focus-screen:fullscreen,
+.focus-screen:-webkit-full-screen{
+  width:100vw;height:100vh;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.focus-screen:fullscreen .timer,
+.focus-screen:-webkit-full-screen .timer{
+  font-size:clamp(110px,28vw,260px);
+  margin:0;
+}
+.focus-screen:fullscreen .exit-focus,
+.focus-screen:-webkit-full-screen .exit-focus{display:block}
+
+body.focus-fallback .focus-screen{
+  position:fixed;inset:0;z-index:9998;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+body.focus-fallback .focus-screen .timer{
+  font-size:clamp(110px,28vw,260px);
+  margin:0;
+}
+body.focus-fallback .focus-screen .exit-focus{display:block}
 @media(max-width:600px){
   .app{padding:10px}.card{padding:13px;border-radius:16px}
   .countdown{gap:5px}.cd{padding:10px 3px}
